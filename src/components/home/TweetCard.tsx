@@ -219,6 +219,31 @@ export const TweetMedia = ({ tweet }: { tweet: EnrichedTweet }) => (
   </div>
 );
 
+function normalizeEntities<E extends Tweet['entities']>(entities?: E): E {
+  return {
+    ...entities,
+    hashtags: entities?.hashtags ?? [],
+    symbols: entities?.symbols ?? [],
+    user_mentions: entities?.user_mentions ?? [],
+    urls: entities?.urls ?? [],
+    media: entities?.media,
+  } as E;
+}
+
+const normalizeTweet = (t: Tweet): Tweet => {
+  if (!t) return t;
+  return {
+    ...t,
+    entities: normalizeEntities(t.entities),
+    quoted_tweet: t.quoted_tweet
+      ? {
+          ...t.quoted_tweet,
+          entities: normalizeEntities(t.quoted_tweet.entities),
+        }
+      : undefined,
+  };
+};
+
 export const MagicTweet = ({
   tweet,
   components,
@@ -229,7 +254,15 @@ export const MagicTweet = ({
   components?: TwitterComponents;
   className?: string;
 }) => {
-  const enrichedTweet = enrichTweet(tweet);
+  let enrichedTweet: EnrichedTweet;
+  try {
+    enrichedTweet = enrichTweet(normalizeTweet(tweet));
+  } catch (err) {
+    console.error("Failed to enrich tweet:", err);
+    const NotFound = components?.TweetNotFound || TweetNotFound;
+    return <NotFound {...props} />;
+  }
+
   return (
     <div
       className={cn(

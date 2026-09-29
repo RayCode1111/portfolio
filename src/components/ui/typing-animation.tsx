@@ -16,13 +16,13 @@ export default function TypingAnimation({
   className,
 }: TypingAnimationProps) {
   const [displayedText, setDisplayedText] = useState<string>("");
-  const [i, setI] = useState<number>(0);
 
   useEffect(() => {
+    let index = 0;
     const typingEffect = setInterval(() => {
-      if (i < text.length) {
-        setDisplayedText(text.substring(0, i + 1));
-        setI(i + 1);
+      if (index < text.length) {
+        setDisplayedText(text.substring(0, index + 1));
+        index++;
       } else {
         clearInterval(typingEffect);
       }
@@ -31,7 +31,7 @@ export default function TypingAnimation({
     return () => {
       clearInterval(typingEffect);
     };
-  }, [duration, i]);
+  }, [duration, text]);
 
   return (
     <h1

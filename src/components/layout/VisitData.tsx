@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 import { Eye } from '@phosphor-icons/react';
 
 type VisitStats = {
-  totalUV: string;
-  dailyUV: string;
-}
+  totalUV: string | number;
+  dailyUV: string | number;
+};
 
 export default function VisitData() {
   const [stats, setStats] = useState<VisitStats>({
@@ -18,9 +18,14 @@ export default function VisitData() {
     const fetchVisitStats = async () => {
       try {
         const response = await fetch('/api/visit-stats');
+        if (!response.ok) return;
         const data = await response.json();
-        // console.log('data: ', data)
-        setStats(data);
+        if (data && (data.totalUV !== undefined || data.dailyUV !== undefined)) {
+          setStats({
+            totalUV: data.totalUV ?? '-',
+            dailyUV: data.dailyUV ?? '-',
+          });
+        }
       } catch (error) {
         console.error('Error fetching visit stats:', error);
       }

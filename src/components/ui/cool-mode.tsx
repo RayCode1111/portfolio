@@ -1,4 +1,4 @@
-import React, { ReactNode, RefObject, useEffect, useRef } from "react";
+import React, { ReactNode, RefObject, useEffect, useRef, useState } from "react";
 
 export interface BaseParticle {
   element: HTMLElement | SVGSVGElement;
@@ -226,13 +226,15 @@ interface CoolModeProps {
 }
 
 export const CoolMode: React.FC<CoolModeProps> = ({ children, options }) => {
-  const ref = useRef<HTMLElement>(null);
+  const [element, setElement] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (ref.current) {
-      return applyParticleEffect(ref.current, options);
+    if (element) {
+      return applyParticleEffect(element, options);
     }
-  }, [options]);
+  }, [element, options]);
 
-  return React.cloneElement(children as React.ReactElement<{ ref: React.Ref<HTMLElement> }>, { ref });
+  return React.cloneElement(children as React.ReactElement<{ ref: React.Ref<HTMLElement> }>, {
+    ref: setElement,
+  });
 };

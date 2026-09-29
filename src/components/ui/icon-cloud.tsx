@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import {
   Cloud,
@@ -63,8 +63,15 @@ export type DynamicCloudProps = {
 
 type IconData = Awaited<ReturnType<typeof fetchSimpleIcons>>;
 
+const emptySubscribe = () => () => {};
+
 export default function IconCloud({ iconSlugs }: DynamicCloudProps) {
   const [data, setData] = useState<IconData | null>(null);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -78,6 +85,10 @@ export default function IconCloud({ iconSlugs }: DynamicCloudProps) {
       renderCustomIcon(icon, theme || "light"),
     );
   }, [data, theme]);
+
+  if (!isMounted || !renderedIcons) {
+    return null;
+  }
 
   return (
     // @ts-ignore
